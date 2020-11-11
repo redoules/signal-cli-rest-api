@@ -26,8 +26,6 @@ func send(c *gin.Context, attachmentTmpDir string, signalCliConfig string, numbe
 	cmd := []string{"--config", signalCliConfig, "-u", number, "send", "-m", message}
 	cmd = append(cmd, recipients...)
 
-	
-
 	attachmentTmpPaths := []string{}
 	for _, base64Attachment := range base64Attachments {
 		u, err := uuid.NewV4()
@@ -35,7 +33,7 @@ func send(c *gin.Context, attachmentTmpDir string, signalCliConfig string, numbe
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
-		
+
 		dec, err := base64.StdEncoding.DecodeString(base64Attachment)
 		if err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
@@ -74,7 +72,7 @@ func send(c *gin.Context, attachmentTmpDir string, signalCliConfig string, numbe
 
 	if len(attachmentTmpPaths) > 0 {
 		cmd = append(cmd, "-a")
-		cmd = append(cmd , attachmentTmpPaths...)
+		cmd = append(cmd, attachmentTmpPaths...)
 	}
 
 	_, err := runSignalCli(cmd)
@@ -118,7 +116,7 @@ func runSignalCli(args []string) (string, error) {
 }
 
 func main() {
-	signalCliConfig := flag.String("signal-cli-config", "/home/.local/share/signal-cli/", "Config directory where signal-cli config is stored")
+	signalCliConfig := flag.String("signal-cli-config", "/root/.local/share/signal-cli/", "Config directory where signal-cli config is stored")
 	attachmentTmpDir := flag.String("attachment-tmp-dir", "/tmp/", "Attachment tmp directory")
 	flag.Parse()
 
@@ -137,7 +135,7 @@ func main() {
 	router.POST("/v1/register/:number", func(c *gin.Context) {
 		number := c.Param("number")
 
-		type Request struct{
+		type Request struct {
 			UseVoice bool `json:"use_voice"`
 		}
 
@@ -189,7 +187,6 @@ func main() {
 			return
 		}
 
-		
 		_, err := runSignalCli([]string{"--config", *signalCliConfig, "-u", number, "verify", token})
 		if err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
@@ -199,11 +196,11 @@ func main() {
 	})
 
 	router.POST("/v1/send", func(c *gin.Context) {
-		type Request struct{
-			Number string `json:"number"`
-			Recipients []string `json:"recipients"`
-			Message string `json:"message"`
-			Base64Attachment string `json:"base64_attachment"`
+		type Request struct {
+			Number           string   `json:"number"`
+			Recipients       []string `json:"recipients"`
+			Message          string   `json:"message"`
+			Base64Attachment string   `json:"base64_attachment"`
 		}
 		var req Request
 		err := c.BindJSON(&req)
@@ -221,10 +218,10 @@ func main() {
 	})
 
 	router.POST("/v2/send", func(c *gin.Context) {
-		type Request struct{
-			Number string `json:"number"`
-			Recipients []string `json:"recipients"`
-			Message string `json:"message"`
+		type Request struct {
+			Number            string   `json:"number"`
+			Recipients        []string `json:"recipients"`
+			Message           string   `json:"message"`
 			Base64Attachments []string `json:"base64_attachments"`
 		}
 		var req Request
@@ -247,10 +244,10 @@ func main() {
 			c.JSON(400, err.Error())
 			return
 		}
-		
+
 		out = strings.Trim(out, "\n")
 		lines := strings.Split(out, "\n")
-		
+
 		jsonStr := "["
 		for i, line := range lines {
 			jsonStr += line
